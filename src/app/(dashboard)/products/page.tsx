@@ -1,12 +1,10 @@
-import { Button } from "@/components/ui/button";
+import ProductsTable from "@/components/Products/ProductTable";
 
 export default function ProductsPage() {
     return (
       <div>
-        <h1 className="text-2xl font-bold mb-4">Products</h1>
-        <Button className=" text-white px-4 py-2 rounded">
-          Add Product
-        </Button>
+        {/* <h1 className="text-2xl font-bold mb-4">Products</h1> */}
+        <ProductsTable />
       </div>
     );
   }
