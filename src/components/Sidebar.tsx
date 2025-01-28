@@ -8,19 +8,34 @@ import {
   Home,
   User,
   BarChart3,
-  Menu,
-  X,
   Sun,
   Moon,
+  PanelRightClose,
+  PanelLeftClose,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
-const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+const Sidebar = ({ isSidebarOpen, toggleSidebar }: { isSidebarOpen: boolean; toggleSidebar: () => void }) => {
   const pathname = usePathname();
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const sideBarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sideBarRef.current && !sideBarRef.current.contains(event.target as Node) && isSidebarOpen) {
+        toggleSidebar();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [isSidebarOpen]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -43,74 +58,68 @@ const Sidebar = () => {
     localStorage.setItem("theme", newTheme);
   };
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   const menuItems = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Products", href: "/products", icon: ShoppingBag },
     { name: "Banners", href: "/banners", icon: FileText },
     { name: "Announcements", href: "/announcement", icon: MegaphoneIcon },
-    { name: "Orders", href: "/orders", icon: Home },
+    // { name: "Orders", href: "/orders", icon: Home },
+    { name: "Categories", href: "/categories", icon: Tag },
     { name: "Users", href: "/users", icon: User },
-    { name: "Reports", href: "/reports", icon: BarChart3 },
+    // { name: "Reports", href: "/reports", icon: BarChart3 },
   ];
 
   return (
     <aside
-      className={`${
-        isCollapsed ? "w-16" : "w-52"
-      } h-full border-r flex flex-col transition-all duration-300`}
+      ref={sideBarRef}
+      className={`fixed h-screen lg:static top-0 left-0 bg-white dark:bg-black transition-transform duration-300 ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0 lg:w-52 w-64 z-50 border-r`}
     >
-      {/* Sidebar Header */}
+      <Button
+        onClick={toggleSidebar}
+        className="absolute top-1/2 z-10 lg:hidden -right-3 transform -translate-y-1/2 bg-primary p-2 rounded-full shadow-lg hover:bg-primary/80"
+        aria-label="Open Sidebar"
+      >
+        {isSidebarOpen ? (
+          <PanelLeftClose className="w-5 h-5" />
+        ) : (
+          <PanelRightClose className="w-5 h-5" />
+        )}
+      </Button>
+
       <div className="p-4 flex items-center justify-between">
-        {!isCollapsed && <h1 className="text-2xl font-bold">Ishan Medicose</h1>}
-        <button
-          onClick={toggleSidebar}
-          className="p-1 rounded-xl shadow hover:bg-accent -mr-7"
-          aria-label="Toggle Sidebar"
-        >
-          {isCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
-        </button>
+        <h1 className="text-2xl font-bold">Ishan Medicose</h1>
       </div>
 
-      {/* Navigation Links */}
-      <nav className={`${isCollapsed ? "p-0" : "p-4 flex-1"} h-full`}>
+      <nav className="p-4">
         <ul className="space-y-1">
           {menuItems.map((item) => (
-            <li key={item.name}>
+            <li key={item.name} onClick={toggleSidebar}>
               <Link
                 href={item.href}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-accent active:bg-accent ${
+                className={`flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-accent ${
                   pathname === item.href ? "bg-accent" : ""
-                } ${isCollapsed ? "justify-center" : ""}`}
+                }`}
               >
                 <item.icon className="w-5 h-5" />
-                {!isCollapsed && <span>{item.name}</span>}
+                <span>{item.name}</span>
               </Link>
             </li>
           ))}
         </ul>
-  
+      </nav>
 
-      {/* Dark Mode Toggle */}
-      <div
-        className={`flex items-center justify-center p-4 ${
-          isCollapsed ? "justify-center" : ""
-        }`}
-      >
+      <div className="p-4">
         <button
-          className="flex items-center justify-center w-full py-2 rounded-md hover:bg-accent"
+          className="flex items-center w-full space-x-3 px-3 py-2 rounded-md hover:bg-accent"
           onClick={toggleDarkMode}
           aria-label="Toggle Theme"
         >
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          {!isCollapsed && (
-            <span className="ml-2">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-          )}
+          <span className="ml-2">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
         </button>
-      </div>    </nav>
+      </div>
     </aside>
   );
 };

@@ -53,6 +53,27 @@ export async function createAdminClient() {
   };
 }
 
+export const createProduct = async (data: any) => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const productCollectionid = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID!;
+  try {
+    
+    const response = await database.createDocument(
+      databaseId,
+      productCollectionid,
+      ID.unique(),
+      data,
+    );
+    
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const updateProduct = async (id: string, updatedData: any) => {
   const client = await createAdminClient();
   const database = client.databases;
@@ -60,7 +81,6 @@ export const updateProduct = async (id: string, updatedData: any) => {
   const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
   const productCollectionid = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID!;
   try {
-    console.log(updatedData);
     
     const response = await database.updateDocument(
       databaseId,
@@ -68,8 +88,26 @@ export const updateProduct = async (id: string, updatedData: any) => {
       id,
       updatedData
     );
-    console.log("response", response);
     
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteProduct = async (id: string,) => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const productCollectionid = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID!;
+  try {
+    
+    const response = await database.deleteDocument(
+      databaseId,
+      productCollectionid,
+      id,
+    );
     return response;
   } catch (error) {
     throw error;
@@ -111,6 +149,70 @@ export async function fetchCategories() {
   const response = await database.listDocuments(databaseId, categoriesCollectionId);
   return response.documents;
 }
+
+
+export async function fetchCategory(data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const categoriesCollectionId = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID!;
+ const id = data.category;
+  const response = await database.getDocument(
+    databaseId, 
+    categoriesCollectionId,
+    id
+  );
+  return response;
+}
+
+
+export async function createCategory(data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const categoriesCollectionId = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID!;
+ const id = data.category;
+  const response = await database.createDocument(
+    databaseId, 
+    categoriesCollectionId,
+    ID.unique(),
+    data
+  );
+  return response;
+}
+
+export async function updateCategory(id: string, data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const categoriesCollectionId = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID!;
+  const response = await database.updateDocument(
+    databaseId, 
+    categoriesCollectionId,
+    id,
+    data
+  );
+  return response;
+}
+
+export async function deleteCategory(id: string) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const categoriesCollectionId = process.env.NEXT_PUBLIC_APPWRITE_CATEGORIES_COLLECTION_ID!;
+  
+  const response = await database.deleteDocument(
+    databaseId, 
+    categoriesCollectionId,
+    id
+  );
+  return response;
+}
+
 
 export async function fetchProductById(productId: string) {
   const client = await createAdminClient();
@@ -185,6 +287,49 @@ export async function fetchProductsByCategory(categoryId: string) {
 };
 
 
+export async function createMedicalDetails(data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const MedicalDetailsCollectionId = process.env.NEXT_PUBLIC_APPWRITE_MEDICAL_DETAILS_COLLECTION_ID!;
+
+  try {
+    const response = await database.createDocument(
+      databaseId,
+      MedicalDetailsCollectionId,
+      ID.unique(),
+      data
+    );
+    return response;
+  } catch (error) {
+    console.error("Error creating medical details: ", error);
+    throw new Error;
+  }
+}
+
+export async function updateMedicalDetails(id: string, data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const MedicalDetailsCollectionId = process.env.NEXT_PUBLIC_APPWRITE_MEDICAL_DETAILS_COLLECTION_ID!;
+
+  try {
+    const response = await database.updateDocument(
+      databaseId,
+      MedicalDetailsCollectionId,
+      id,
+      data
+    );
+
+    return response;
+  } catch (error) {
+    console.error("Error updating medical details: ", error);
+    throw new Error;
+  }
+}
+
 export async function fetchMedicalDetails(productId: string) {
   const client = await createAdminClient();
   const database = client.databases;
@@ -206,6 +351,36 @@ export async function fetchMedicalDetails(productId: string) {
   }
 }
 
+export const deleteMedicalDetails = async (medicalId: string) => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const MedicalDetailsCollectionId = process.env.NEXT_PUBLIC_APPWRITE_MEDICAL_DETAILS_COLLECTION_ID!;
+
+  try {
+
+    const response = await database.listDocuments(
+      databaseId,
+      MedicalDetailsCollectionId,
+      [
+        Query.search("productId",medicalId)
+      ]
+    );
+
+    await database.deleteDocument(
+      databaseId,
+      MedicalDetailsCollectionId,
+      response.documents[0].$id
+    )
+
+
+  } catch (error) {
+    console.error("Error deleting medical details:", error);
+    throw error;
+  }
+};
+
 export async function searchProducts(query: string) {
   const client = await createAdminClient();
   const database = client.databases;
@@ -219,7 +394,6 @@ export async function searchProducts(query: string) {
       productCollectionId,
       [
         Query.search('name', query),
-        // Query.search('description', query)
       ]
     );
 
@@ -279,52 +453,6 @@ export async function fetchCouponByCode(couponCode: string, originalPrice: numbe
   }
 }
 
-export async function fetchBanners() {
-  const client = await createAdminClient();
-  const storage = client.storages;
-
-  const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BANNER_BUCKET_ID!;
-
-  try {
-    const response = await storage.listFiles(bucketId);
-
-    const banners = response.files.map((file) => ({
-      id: file.$id,
-      name: file.name,
-      url: `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${bucketId}/files/${file.$id}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`
-    }))
-    return banners;
-  } catch (error) {
-    console.error('Error fetching banners: ', error);
-    throw new Error('Unknown error occured while fetching banners.');
-  }
-}
-
-
-export async function fetchAnnouncement() {
-  const client = await createAdminClient();
-  const database = client.databases;
-
-  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
-  const AnnouncementCollectionId = process.env.NEXT_PUBLIC_APPWRITE_ANNOUNCEMENT_COLLECTION_ID!;
-  try {
-    const response = await database.listDocuments(
-      databaseId,
-      AnnouncementCollectionId,
-      [Query.equal("isActive", true)],
-    )
-
-    if (response.documents.length > 0) {
-      return response.documents[0]
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching announcement:", error);
-    throw new Error("Failed to fetch announcement");
-  }
-}
-
 export const uploadImage = async (file: File) => {
   const client = await createAdminClient();
   const storage = client.storages;
@@ -360,3 +488,205 @@ export const deleteImage = async (file: string) => {
     throw error;
   }
 };
+
+export const fetchProductsCount = async () => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const productCollectionid = process.env.NEXT_PUBLIC_APPWRITE_PRODUCTS_COLLECTION_ID!;
+
+  try {
+    const response = await database.listDocuments(databaseId, productCollectionid);
+    const totalProducts = response.total;
+    const inStockProducts = response.documents.filter((product: any) => product.inStock === true).length;
+    return { total: totalProducts, inStock: inStockProducts };
+  } catch (error) {
+    return { total: 0, inStock: 0 };
+  }
+}
+
+export const fetchUsersCount = async () => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const userCollectionid = process.env.NEXT_PUBLIC_APPWRITE_USER_COLLECTION_ID!;
+
+  try {
+    const response = await database.listDocuments(databaseId, userCollectionid);
+    return response.total;
+  } catch (error) {
+    return 0;
+  }
+}
+
+
+export const fetchSubsCount = async () => {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const userCollectionid = process.env.NEXT_PUBLIC_APPWRITE_NEWSLETTER_COLLECTION_ID!;
+
+  try {
+    const response = await database.listDocuments(databaseId, userCollectionid);
+    return response.total;
+  } catch (error) {
+    return 0;
+  }
+}
+
+export async function fetchAnnouncement() {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const AnnouncementCollectionId = process.env.NEXT_PUBLIC_APPWRITE_ANNOUNCEMENT_COLLECTION_ID!;
+  try {
+    const response = await database.listDocuments(
+      databaseId,
+      AnnouncementCollectionId,
+    )
+
+      return response
+    
+  } catch (error) {
+    console.error("Error fetching announcement:", error);
+    throw new Error("Failed to fetch announcement");
+  }
+}
+
+export async function createAnnouncement(data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const AnnouncementCollectionId = process.env.NEXT_PUBLIC_APPWRITE_ANNOUNCEMENT_COLLECTION_ID!;
+  try {
+    const response = await database.createDocument(
+      databaseId,
+      AnnouncementCollectionId,
+      ID.unique(),
+      data
+    )
+    return response
+  } catch (error) {
+    console.error("Error creating announcement:", error);
+    throw new Error("Failed to create announcement");
+  }
+}
+
+export async function updateAnnouncement(id: string, data: any) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const AnnouncementCollectionId = process.env.NEXT_PUBLIC_APPWRITE_ANNOUNCEMENT_COLLECTION_ID!;
+  try {
+    const response = await database.updateDocument(
+      databaseId,
+      AnnouncementCollectionId,
+      id,
+      data
+    )
+    return response
+  } catch (error) {
+    console.error("Error updating announcement:", error);
+    throw new Error("Failed to update announcement");
+  }
+}
+
+export async function deleteAnnouncement(id: string) {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+  const AnnouncementCollectionId = process.env.NEXT_PUBLIC_APPWRITE_ANNOUNCEMENT_COLLECTION_ID!;
+  try {
+    const response = await database.deleteDocument(
+      databaseId,
+      AnnouncementCollectionId,
+      id,
+    )
+    return response
+  } catch (error) {
+    console.error("Error deleting announcement:", error);
+    throw new Error("Failed to delete announcement");
+  }
+}
+
+export async function fetchBanners() {
+  const client = await createAdminClient();
+  const storage = client.storages;
+
+  const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BANNER_BUCKET_ID!;
+
+  try {
+    const response = await storage.listFiles(bucketId);
+
+    const banners = response.files.map((file) => ({
+      id: file.$id,
+      name: file.name,
+      url: `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${bucketId}/files/${file.$id}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`
+    }))
+    return banners;
+  } catch (error) {
+    console.error('Error fetching banners: ', error);
+    throw new Error('Unknown error occured while fetching banners.');
+  }
+}
+
+export const uploadBanner = async (file: File) => {
+  const client = await createAdminClient();
+  const storage = client.storages;
+
+  const productStorageId = process.env.NEXT_PUBLIC_APPWRITE_BANNER_BUCKET_ID!;
+
+  try {
+    const response = await storage.createFile(
+      productStorageId,
+      ID.unique(),
+      file,
+    );
+    return response.$id;
+  } catch (error) {
+    console.error("Error uploading banner:", error);
+    throw error;
+  }
+};
+
+export const deleteBanner = async (file: string) => {
+  const client = await createAdminClient();
+  const storage = client.storages;
+
+  const productStorageId = process.env.NEXT_PUBLIC_APPWRITE_BANNER_BUCKET_ID!;
+
+  try {
+    await storage.deleteFile(
+      productStorageId,
+      file,
+    );
+  } catch (error) {
+    console.error("Error uploading banner:", error);
+    throw error;
+  }
+};
+
+
+export async function fetchUsers() {
+  const client = await createAdminClient();
+  const database = client.databases;
+
+    const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+    const userCollectionid = process.env.NEXT_PUBLIC_APPWRITE_USER_COLLECTION_ID!;
+  
+    try {
+      const response = await database.listDocuments(databaseId, userCollectionid);
+      return response.documents;
+    } 
+   catch (error) {
+    console.error("Error fetching users");
+    throw new Error("Failed to fetch users.");
+  }
+}

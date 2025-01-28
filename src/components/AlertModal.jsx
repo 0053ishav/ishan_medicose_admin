@@ -7,7 +7,7 @@ const AlertModal = ({ isOpen, title, message, onClose }) => {
 
   const handleClose = () => {
     onClose();
-    window.location.reload();
+    // window.location.reload();
   };
   const isError = title === "Error";
   const titleColor = isError ? "text-destructive" : "";
@@ -25,13 +25,15 @@ const AlertModal = ({ isOpen, title, message, onClose }) => {
             </h2>
             <p className="text-lg text-center">{message}</p>
           </div>
+        </div>
+        <div className="flex justify-end items-center">
           <Button
             onClick={handleClose}
-            className={`${buttonColor} font-semibold py-2 px-4 rounded-md w-full transition duration-300 ease-in-out mt-4`}
+            className={`${buttonColor} font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out mt-4`}
           >
             Close
           </Button>
-        </div>
+            </div>
       </div>
     </div>
   );

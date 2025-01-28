@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2, ArrowLeft } from "lucide-react";
-import { fetchMedicalDetails, fetchProductById } from "@/lib/appwrite";
+import { fetchCategory, fetchMedicalDetails, fetchProductById } from "@/lib/appwrite";
 import { Button } from "@/components/ui/button";
 
 const ProductDetailPage = () => {
@@ -14,6 +14,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState<any>(null);
   const [medicalDetails, setMedicalDetails] = useState<any[]>([]);
   const [selectedImage, setSelectedImage] = useState<string>("");
+  const [categoryName, setCategoryName] = useState<string>("");
 
   useEffect(() => {
     if (id) {
@@ -23,8 +24,14 @@ const ProductDetailPage = () => {
           setProduct(data);
           const response = await fetchMedicalDetails(id as string);
           setMedicalDetails(response.documents);
+          
+          if (data) {
+            const categoryData = await fetchCategory(data);
+            setCategoryName(categoryData.categoryName || "N/A");
+          }
+
         } catch (error) {
-          console.error("Error fetching product:", error);
+          throw new Error("Error fetching product.",);
         } finally {
           setLoading(false);
         }
@@ -59,7 +66,7 @@ const ProductDetailPage = () => {
         variant={"outline"}
       >
         <ArrowLeft size={18} />
-        <span>Back to Products</span>
+        {/* <span>Back to Products</span> */}
       </Button>
 
       <div className="mt-8 p-6 border rounded-lg shadow-md">
@@ -72,6 +79,7 @@ const ProductDetailPage = () => {
                 width={300}
                 height={300}
                 className="rounded-lg"
+                priority
               />
               <Image
                 src={product.hoverImageUrl}
@@ -122,7 +130,7 @@ const ProductDetailPage = () => {
             </p>
             <p className="mt-2 text-lg">
               <span className="font-semibold">Category: </span>
-              {product.category || "N/A"}
+              {categoryName || "N/A"}
             </p>
             <p className="mt-2 text-lg">
               <span className="font-semibold">Tags: </span>

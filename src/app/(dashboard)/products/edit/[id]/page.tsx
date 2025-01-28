@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import {
   deleteImage,
   fetchCategories,
+  fetchMedicalDetails,
   fetchProductById,
+  updateMedicalDetails,
   updateProduct,
   uploadImage,
 } from "@/lib/appwrite";
@@ -13,6 +15,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AlertModal from "@/components/AlertModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const EditProductPage = () => {
   const router = useRouter();
@@ -24,6 +28,8 @@ const EditProductPage = () => {
   const [categories, setCategories] = useState<any[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [hoverImageFile, setHoverImageFile] = useState<File | null>(null);
+  const [medicalDetails, setMedicalDetails] = useState<any | null>(null);
+
 
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -55,6 +61,16 @@ const EditProductPage = () => {
       }
     };
     loadCategories();
+
+    const loadMedicalDetails = async () => {
+      try {
+        const details = await fetchMedicalDetails(id as string);
+        setMedicalDetails(details.documents[0]);
+      } catch (error) {
+        console.error("Error fetching medical details:", error);
+      }
+    };
+    loadMedicalDetails();
   }, [id]);
 
   const openAlert = (title: string, message: string) => {
@@ -68,6 +84,11 @@ const EditProductPage = () => {
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setProduct((prev: any) => ({ ...prev, [name]: value }));
+  };
+
+  const handleMedicalInputChange = (e: any) => {
+    const { name, value } = e.target;
+    setMedicalDetails((prev: any) => ({ ...prev, [name]: value }));
   };
 
   //   const handleArrayChange = (e: any) => {
@@ -158,7 +179,14 @@ const EditProductPage = () => {
         tags: product.tags.toLowerCase(),
       };
 
+      const updatedMedicalDetails = {
+        ...medicalDetails,
+        productId: id,
+      };
+
       await updateProduct(id as string, updatedProduct);
+      await updateMedicalDetails(id as string, updatedMedicalDetails);
+
 
       openAlert("Success", "Product updated successfully!");
       router.refresh();
@@ -186,9 +214,27 @@ const EditProductPage = () => {
         variant={"outline"}
       >
         <ArrowLeft size={18} />
-        <span>Back to Products</span>
+        {/* <span>Back to Products</span> */}
       </Button>
-      <h1 className="text-2xl font-bold mb-4">Edit Product</h1>
+      <div className="flex justify-between items-center">
+
+      <h1 className="text-2xl font-bold my-4">Edit Product</h1>
+              {/* Save Button */}
+              <Button
+          type="button"
+          onClick={handleSave}
+          disabled={saveLoading}
+          className={`  px-4 py-2 rounded ${
+            saveLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          {saveLoading ? (
+            <Loader2 className="animate-spin w-5 h-5 inline" />
+          ) : (
+            "Save"
+          )}{" "}
+        </Button>
+          </div>
       <form>
         <div className="mb-4">
           <label className="block">Name</label>
@@ -198,7 +244,6 @@ const EditProductPage = () => {
             value={product.name}
             onChange={handleInputChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent"
           />
         </div>
         <div className="mb-4">
@@ -209,7 +254,6 @@ const EditProductPage = () => {
             value={product.price}
             onChange={handleInputChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent"
           />
         </div>
         <div className="mb-4">
@@ -220,33 +264,49 @@ const EditProductPage = () => {
             value={product.stock}
             onChange={handleInputChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent"
           />
         </div>
         <div className="mb-4">
           <label className="block">Available</label>
-          <select
+          {/* <select
             name="inStock"
             value={product.inStock ? "true" : "false"}
             onChange={handleInputChange}
-            className={`border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
+            className={`border border-gray-300 p-2 dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
               saveLoading ? "opacity-50" : ""
             }`}
           >
             <option value="true">True</option>
             <option value="false">False</option>
           </select>
+           */}
+
+          <Select
+            name="inStock"
+            value={product.inStock  ? "true" : "false"}
+            onValueChange={(value) =>
+                setProduct((prev: any) => ({ ...prev, inStock: value }))
+              }
+            disabled={saveLoading}
+          >
+  <SelectTrigger className="w-[180px]">
+    <SelectValue placeholder="Stock" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="true">True</SelectItem>
+    <SelectItem value="false">False</SelectItem>
+  </SelectContent>
+</Select>
         </div>
         <div className="mb-4">
           <label className="block">Description</label>
-          <textarea
+            <Textarea
             name="description"
             value={product.description || "N/A"}
             onChange={handleInputChange}
-            className={`border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
-              saveLoading ? "opacity-50" : ""
-            }`}
-          />
+            disabled={saveLoading}
+            className=" p-2 w-full rounded-md"
+            />
         </div>
         <div className="mb-4">
           <label className="block">Discount Percentage</label>
@@ -256,16 +316,16 @@ const EditProductPage = () => {
             value={product.discountPercentage || "N/A"}
             onChange={handleInputChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent"
           />
         </div>
+    
         <div className="mb-4">
           <label className="block">Category</label>
-          <select
+          {/* <select
             name="category"
             value={product.category || "N/A"}
             onChange={handleInputChange}
-            className={`border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
+            className={`border border-gray-300 p-2 dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
               saveLoading ? "opacity-50" : ""
             }`}
           >
@@ -275,22 +335,61 @@ const EditProductPage = () => {
                 {category.categoryName}
               </option>
             ))}
-          </select>
+          </select> */}
+          <Select
+            value={product.category || ""}
+            onValueChange={(value) =>
+              setProduct((prev: any) => ({ ...prev, category: value }))
+            }
+            disabled={saveLoading}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a Category" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value=" ">Select a Category</SelectItem> 
+              {categories.map((category) => (
+                <SelectItem key={category.$id} value={category.$id}>
+                  {category.categoryName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
         </div>
         <div className="mb-4">
           <label className="block">Tags</label>
-          <select
+          {/* <select
             name="tags"
             value={product.tags || "N/A"}
             onChange={handleInputChange}
-            className={`border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
+            className={`border border-gray-300 p-2 dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none${
               saveLoading ? "opacity-50" : ""
             }`}
           >
             <option value="bestsellers">Bestsellers</option>
             <option value="featured">Featured</option>
-          </select>
+          </select> */}
+          <Select
+            value={product.tags || ""}
+            onValueChange={(value) =>
+              setProduct((prev: any) => ({ ...prev, tags: value }))
+            }
+            disabled={saveLoading}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Tags" />
+            </SelectTrigger>
+            <SelectContent>
+            <SelectItem value=" ">Select a Tag</SelectItem>
+              <SelectItem value="bestsellers">Bestsellers</SelectItem>
+              <SelectItem value="featured">Featured</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+
+        <div className="sm:flex sm:flex-row sm:gap-2 sm:justify-between">
+
         <div className="mb-4">
           <label className="block">Product Image</label>
           {product.imageUrl && (
@@ -316,8 +415,17 @@ const EditProductPage = () => {
             accept="image/*"
             onChange={handleFileChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+            className="border p-2"
           />
+          {imageFile && (
+                      <Image
+                        src={URL.createObjectURL(imageFile)}
+                        alt="Preview"
+                        className="h-24 w-24 object-cover mt-2"
+                        width={80}
+                        height={80}
+                      />
+                    )}
         </div>
         <div className="mb-4">
           <label className="block">Hover Image</label>
@@ -344,8 +452,18 @@ const EditProductPage = () => {
             accept="image/*"
             onChange={handleHoverImageChange}
             disabled={saveLoading}
-            className="border border-gray-300 p-2 w-full dark:bg-accent rounded-md focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+            className="border p-2"
           />
+                    {hoverImageFile && (
+                      <Image
+                        src={URL.createObjectURL(hoverImageFile)}
+                        alt="Preview"
+                        className="h-24 w-24 object-cover mt-2"
+                        width={80}
+                        height={80}
+                      />
+                    )}
+        </div>
         </div>
         {/* <div className="mb-4">
           <label className="block">Additional Image URLs (comma separated)</label>
@@ -359,12 +477,129 @@ const EditProductPage = () => {
           />
         </div> */}
 
-        {/* Save Button */}
-        <Button
+
+  {/* Medical Details Form Fields */}
+
+  <div className="shadow p-4 border">
+            <h1 className="text-center text-2xl font-bold">Medical Details</h1>
+
+  {medicalDetails ? (
+          <>
+            <div className="mb-4">
+              <label className="block">Medical Detail Name</label>
+              <Input
+                type="text"
+                name="name"
+                value={medicalDetails.name || ""}
+                onChange={handleMedicalInputChange}
+                disabled={saveLoading}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block">Medical Detail Description</label>
+              <Textarea
+                name="description"
+                value={medicalDetails.description || ""}
+                onChange={handleMedicalInputChange}
+                disabled={saveLoading}
+              />
+            </div>
+
+
+        {/* Features */}
+        <div className="mb-4">
+          <label className="block">Features (comma separated)</label>
+          <Input
+            type="text"
+            name="features"
+            placeholder="Fast-acting pain relief, Non-greasy formula, Recommended by doctors"
+            value={medicalDetails.features.join(", ")}
+            onChange={(e) => {
+              const features = e.target.value.split(",").map((feature) => feature.trim());
+              setMedicalDetails((prev: any) => ({ ...prev, features }));
+            }}
+            disabled={saveLoading}
+          />
+        </div>
+
+        {/* Medical Uses */}
+        <div className="mb-4">
+          <label className="block">Medical Uses</label>
+          <Input
+            type="text"
+            name="medicalUses"
+            value={medicalDetails.medicalUses}
+            onChange={handleMedicalInputChange}
+            disabled={saveLoading}
+          />
+        </div>
+
+        {/* Precautions */}
+        <div className="mb-4">
+          <label className="block">Precautions (comma separated)</label>
+          <Input
+            type="text"
+            name="precautions"
+            placeholder="Do not use on open wounds, Keep away from children, Consult a doctor if irritation occurs"
+            value={medicalDetails.precautions.join(", ")}
+            onChange={(e) => {
+              const precautions = e.target.value.split(",").map((precaution) => precaution.trim());
+              setMedicalDetails((prev: any) => ({ ...prev, precautions }));
+            }}
+            disabled={saveLoading}
+          />
+        </div>
+
+        {/* Manufacturer */}
+        <div className="mb-4">
+          <label className="block">Manufacturer</label>
+          <Input
+            type="text"
+            name="manufacturer"
+            value={medicalDetails.manufacturer}
+            onChange={handleMedicalInputChange}
+            disabled={saveLoading}
+          />
+        </div>
+
+        {/* Dosage */}
+        <div className="mb-4">
+          <label className="block">Dosage</label>
+          <Input
+            type="text"
+            name="dosage"
+            placeholder="Apply twice daily or as directed by a physician."
+            value={medicalDetails.dosage}
+            onChange={handleMedicalInputChange}
+            disabled={saveLoading}
+          />
+        </div>
+
+        {/* Expiry Date */}
+        <div className="mb-4">
+          <label className="block">Expiry Date</label>
+          <Input
+            type="date"
+            name="expiryDate"
+            value={medicalDetails.expiryDate}
+            onChange={handleMedicalInputChange}
+            disabled={saveLoading}
+            className="w-[150px]"
+          />
+        </div>
+
+          </>
+        ) : (
+          <h3 className="text-center text-destructive">No Medical Details</h3>
+        )}
+</div>
+
+  {/* Save Button */}
+  <Button
           type="button"
           onClick={handleSave}
           disabled={saveLoading}
-          className={`  px-4 py-2 rounded ${
+          className={`  px-4 py-2 mt-4 rounded ${
             saveLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
@@ -380,7 +615,7 @@ const EditProductPage = () => {
         title={alert.title}
         isOpen={alert.isOpen}
         message={alert.message}
-        onClose={closeAlert}
+        onClose={() => router.push("/products")}
       />
     </div>
   );
