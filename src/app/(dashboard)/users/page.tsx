@@ -73,7 +73,6 @@ const UsersPage = () => {
     );
   }
 
-  // Show error if there was an issue fetching users
   if (error) {
     return (
       <div className="text-center text-red-500">
@@ -82,39 +81,38 @@ const UsersPage = () => {
     );
   }
 
-  // Render the users data
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Users Management</h1>
       <div className="overflow-x-auto">
-        <table className="table-auto w-full border-collapse border border-gray-300">
+        <table className="table-auto w-full border-collapse border ">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-4 py-2">#</th>
-              <th className="border border-gray-300 px-4 py-2">Name</th>
-              <th className="border border-gray-300 px-4 py-2">Email</th>
-              <th className="border border-gray-300 px-4 py-2">Phone</th>
-              <th className="border border-gray-300 px-4 py-2">Address</th>
-              <th className="border border-gray-300 px-4 py-2">Cart</th>
-              <th className="border border-gray-300 px-4 py-2">Wishlist</th>
+            <tr className="">
+              <th className="border px-4 py-2">#</th>
+              <th className="border px-4 py-2">Name</th>
+              <th className="border px-4 py-2">Email</th>
+              <th className="border px-4 py-2">Phone</th>
+              <th className="border px-4 py-2">Address</th>
+              <th className="border px-4 py-2">Cart</th>
+              <th className="border px-4 py-2">Wishlist</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user, index) => (
-              <tr key={user.userId} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">
+              <tr key={user.userId} className={index % 2 === 0 ? '' : 'bg-gray-50'}>
+                <td className="border px-4 py-2">{index + 1}</td>
+                <td className="border px-4 py-2">
                   {user.firstName} {user.lastName}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border px-4 py-2">{user.email}</td>
+                <td className="border px-4 py-2">{user.phone}</td>
+                <td className="border px-4 py-2">
                   {user.address}, {user.city}, {user.state} - {user.postalCode}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border px-4 py-2">
                   {user.cart.length > 0 ? user.cart.join(', ') : 'None'}
                 </td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border px-4 py-2">
                   {user.wish.length > 0 ? user.wish.join(', ') : 'None'}
                 </td>
               </tr>
