@@ -5,6 +5,9 @@ import { auth } from "@/firebase/firebaseConfig";
 import { confirmPasswordReset } from "firebase/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 const ResetPasswordForm = ({ oobCode }: { oobCode: string | null }) => {
   const [newPassword, setNewPassword] = useState("");
@@ -50,17 +53,24 @@ const ResetPasswordForm = ({ oobCode }: { oobCode: string | null }) => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-bold text-center mb-4">Reset Password</h2>
-        <p className="text-sm text-gray-600 text-center mb-6">
+    <section className="flex-center size-full flex flex-col justify-start items-center sm:justify-center min-h-screen px-4 py-8 bg-gray-50 sm:px-6 lg:px-8">
+
+<div className="w-full max-w-md p-6 space-y-4 bg-white shadow-md rounded-lg">
+
+<div className="flex flex-col items-center space-y-4">
+          <Image src="/Logo/logoPlus.png" width={50} height={50} alt="Logo" />
+          <h1 className="text-2xl font-semibold text-gray-800">
+          Reset Password
+          </h1>
+          <p className="text-sm text-gray-600">
           Enter your new password below.
-        </p>
+          </p>
+        </div>
 
         {message && <p className="text-green-600 text-center">{message}</p>}
         {error && <p className="text-red-600 text-center">{error}</p>}
 
-        <form onSubmit={handleResetPassword} className="space-y-4">
+        <form onSubmit={handleResetPassword} className="space-y-6 text-left">
           <input
             type="password"
             placeholder="New Password"
@@ -77,22 +87,26 @@ const ResetPasswordForm = ({ oobCode }: { oobCode: string | null }) => {
             className="w-full px-4 py-2 border rounded-md"
             required
           />
-          <button
+          <Button
             type="submit"
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md"
+            className="w-full px-4 py-2 rounded-md"
             disabled={loading}
           >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
+            {loading ? <Loader2 className="animate-spin" /> : "Reset Password"}
+          </Button>
         </form>
 
-        <div className="text-center mt-4">
-          <Link href="/sign-in" className="text-blue-500 text-sm">
-            Back to Sign In
+        <p className="text-sm text-center text-gray-600">
+          Back to
+          <Link
+            href="/sign-in"
+            className="font-medium text-primary hover:underline ml-2"
+          >
+            Sign In
           </Link>
-        </div>
-      </div>
+        </p>
     </div>
+    </section>
   );
 };
 
