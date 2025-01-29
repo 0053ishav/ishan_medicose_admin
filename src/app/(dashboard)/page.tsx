@@ -2,7 +2,9 @@
 
 import ChartComponent from "@/components/ChartComponent";
 import { fetchProductsCount, fetchSubsCount, fetchUsersCount } from "@/lib/appwrite";
+import { useAuth } from "@/lib/hooks/useAuth";
 import { Loader2, User, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
@@ -11,6 +13,25 @@ export default function DashboardPage() {
   const [subs, setSubs] = useState(0);
   const [loading, setLoading] = useState(false);
 
+    const { loggedUser, userLoading } = useAuth();
+    const router = useRouter();
+    
+    useEffect(() => {
+      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+        router.push("/sign-in");
+      }
+    }, [loggedUser, userLoading, router]);
+  
+    if (userLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-screen">
+            <Loader2 className="animate-spin text-foreground"/>
+        </div>
+      ) 
+    }
+      
+    if (!loggedUser || loggedUser.role !== "admin") return null;
+  
   useEffect(() => {
     const getCountProducts = async () => {
       setLoading(true);

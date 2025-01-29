@@ -5,10 +5,32 @@ import { auth } from "@/firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useEffect } from "react";
 
 const Accounts = () => {
   const user = auth.currentUser;
   const router = useRouter()
+  const { loggedUser, userLoading } = useAuth();
+  
+    useEffect(() => {
+      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+        router.push("/sign-in");
+      }
+    }, [loggedUser, userLoading, router]);
+  
+    if (userLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-screen">
+            <Loader2 className="animate-spin text-foreground"/>
+        </div>
+      ) 
+    }
+      
+    if (!loggedUser || loggedUser.role !== "admin") return null;
+  
+  
+
   if (!user) {
     return (
         <div className="flex justify-center items-center w-full h-screen">

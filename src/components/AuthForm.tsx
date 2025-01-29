@@ -133,7 +133,7 @@ const AuthForm = ({ type }: { type: string }) => {
                 "No role assigned for this user. Please contact to the owner.",
               variant: "destructive",
             });
-            // router.push("/sign-up");
+            router.push("/sign-up");
           }
         }
       } else if (type === "sign-up") {
@@ -227,6 +227,12 @@ const AuthForm = ({ type }: { type: string }) => {
                 {form.formState.errors.password.message}
               </p>
             )}
+
+            <div className={`${type === "sign-up" ? "hidden" : "mt-2"}`}>
+              <Link href="/forgot-password" className="text-blue-500 text-sm">
+                Forgot Password?
+              </Link>
+            </div>
           </div>
           {type === "sign-up" && (
             <div>
@@ -287,9 +293,7 @@ const AuthForm = ({ type }: { type: string }) => {
                 height={18}
                 className="mr-2"
               />
-              <span className="">
-              Sign in with Google
-              </span>
+              <span className="">Sign in with Google</span>
             </div>
           )}
         </Button>

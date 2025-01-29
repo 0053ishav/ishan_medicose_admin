@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/table';
 import { fetchAnnouncement, updateAnnouncement, deleteAnnouncement, createAnnouncement } from '@/lib/appwrite'; // Assuming this is the correct import path
-import { PenIcon, Trash2 } from 'lucide-react';
+import { Loader2, PenIcon, Trash2 } from 'lucide-react';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 // Sample announcement data
 interface Announcement {
@@ -20,6 +22,27 @@ const AnnouncementPage = () => {
   const [isActive, setIsActive] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [loading, setLoading] = useState(false);
+
+
+  const { loggedUser, userLoading } = useAuth();
+  const router = useRouter();
+  
+  useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+      router.push("/sign-in");
+    }
+  }, [loggedUser, userLoading, router]);
+
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+          <Loader2 className="animate-spin text-foreground"/>
+      </div>
+    ) 
+  }
+    
+  if (!loggedUser || loggedUser.role !== "admin") return null;
+
 
   useEffect(() => {
     const fetchData = async () => {

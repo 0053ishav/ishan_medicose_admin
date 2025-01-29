@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { uploadBanner, deleteBanner, fetchBanners } from '@/lib/appwrite';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 interface Banner {
   id: string;
@@ -18,6 +20,27 @@ const BannersPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+
+    const { loggedUser, userLoading } = useAuth();
+    const router = useRouter();
+    
+    useEffect(() => {
+      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+        router.push("/sign-in");
+      }
+    }, [loggedUser, userLoading, router]);
+  
+    if (userLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-screen">
+            <Loader2 className="animate-spin text-foreground"/>
+        </div>
+      ) 
+    }
+      
+    if (!loggedUser || loggedUser.role !== "admin") return null;
+  
 
   useEffect(() => {
     const loadBanners = async () => {

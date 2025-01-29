@@ -7,6 +7,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/lib/appwrite'; // Adjust the import path as needed
 import Image from 'next/image';
 import { Loader2, Trash2, Edit2, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 interface Category {
   id: string;
@@ -23,6 +25,27 @@ const CategoriesPage = () => {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editedCategoryName, setEditedCategoryName] = useState('');
   const [editedCategoryImageUrl, setEditedCategoryImageUrl] = useState('');
+
+
+    const { loggedUser, userLoading } = useAuth();
+    const router = useRouter();
+    
+    useEffect(() => {
+      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+        router.push("/sign-in");
+      }
+    }, [loggedUser, userLoading, router]);
+  
+    if (userLoading) {
+      return (
+        <div className="flex justify-center items-center w-full h-screen">
+            <Loader2 className="animate-spin text-foreground"/>
+        </div>
+      ) 
+    }
+      
+    if (!loggedUser || loggedUser.role !== "admin") return null;
+  
 
   useEffect(() => {
     const fetchAllCategories = async () => {
