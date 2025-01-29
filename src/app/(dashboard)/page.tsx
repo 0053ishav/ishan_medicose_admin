@@ -11,30 +11,20 @@ export default function DashboardPage() {
   const { loggedUser, userLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
-      router.push("/sign-in");
-    }
-  }, [loggedUser, userLoading, router]);
-
-  // Ensure that no other hooks are called before authentication check completes
-  if (userLoading) {
-    return (
-      <div className="flex justify-center items-center w-full h-screen">
-        <Loader2 className="animate-spin text-foreground" />
-      </div>
-    );
-  }
-
-  if (!loggedUser || loggedUser.role !== "admin") return null;
-
-  // State hooks should be declared after the authentication check
   const [counts, setCounts] = useState({ total: 0, inStock: 0 });
   const [users, setUsers] = useState(0);
   const [subs, setSubs] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+      router.replace("/sign-in");
+    }
+  }, [loggedUser, userLoading, router]);
+
+  useEffect(() => {
+    if (!loggedUser || loggedUser.role !== "admin") return;
+
     const getCountProducts = async () => {
       setLoading(true);
       try {
@@ -50,8 +40,19 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
+
     getCountProducts();
-  }, []);
+  }, [loggedUser]);
+
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+        <Loader2 className="animate-spin text-foreground" />
+      </div>
+    );
+  }
+
+  if (!loggedUser || loggedUser.role !== "admin") return null;
 
   return (
     <div className="px-6 py-8">
