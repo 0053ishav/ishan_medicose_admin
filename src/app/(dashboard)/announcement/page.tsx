@@ -9,7 +9,6 @@ import { Loader2, PenIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 
-// Sample announcement data
 interface Announcement {
   id: string;
   message: string;
@@ -17,47 +16,32 @@ interface Announcement {
 }
 
 const AnnouncementPage = () => {
-
   const { loggedUser, userLoading } = useAuth();
   const router = useRouter();
   
-  useEffect(() => {
-    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
-      router.push("/sign-in");
-    }
-  }, [loggedUser, userLoading, router]);
-
-  if (userLoading) {
-    return (
-      <div className="flex justify-center items-center w-full h-screen">
-          <Loader2 className="animate-spin text-foreground"/>
-      </div>
-    ) 
-  }
-    
-  if (!loggedUser || loggedUser.role !== "admin") return null;
-
-
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [message, setMessage] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+      router.push("/sign-in");
+    }
+  }, [loggedUser, userLoading, router]);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const response = await fetchAnnouncement();
         if (response) {
-
-          const result = response.documents.map((res: any) => ({
+          setAnnouncements(response.documents.map((res: any) => ({
             id: res.$id,
             message: res.message,
             isActive: res.isActive,
-          }))
-          setAnnouncements(result);
+          })));
         }
       } catch (error) {
         console.error("Error fetching announcements:", error);
@@ -66,25 +50,29 @@ const AnnouncementPage = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (loggedUser && loggedUser.role === "admin") {
+      fetchData();
+    }
+  }, [loggedUser]);
 
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+        <Loader2 className="animate-spin text-foreground"/>
+      </div>
+    );
+  }
+  
+  if (!loggedUser || loggedUser.role !== "admin") return null;
 
   const handleCreate = async () => {
-    if (message) {
-      const newAnnouncement = {
-        message,
-        isActive,
-      };
-
-      try {
-        const response = await createAnnouncement(newAnnouncement);
-        const createdAnnouncement = { ...newAnnouncement, id: response.$id };
-        setAnnouncements([...announcements, createdAnnouncement]);
-        resetForm();
-      } catch (error) {
-        console.error("Error creating announcement:", error);
-      }
+    if (!message) return;
+    try {
+      const response = await createAnnouncement({ message, isActive });
+      setAnnouncements([...announcements, { id: response.$id, message, isActive }]);
+      resetForm();
+    } catch (error) {
+      console.error("Error creating announcement:", error);
     }
   };
 
@@ -95,30 +83,20 @@ const AnnouncementPage = () => {
   };
 
   const handleUpdate = async () => {
-    if (editing) {
-      const updatedAnnouncement: Announcement = {
-        ...editing,
-        message,
-        isActive,
-      };
-      try {
-        await updateAnnouncement(updatedAnnouncement.id, {message, isActive});
-        setAnnouncements(
-          announcements.map((announcement) =>
-            announcement.id === updatedAnnouncement.id ? updatedAnnouncement : announcement
-          )
-        );
-        resetForm();
-      } catch (error) {
-        console.error("Error updating announcement:", error);
-      }
+    if (!editing) return;
+    try {
+      await updateAnnouncement(editing.id, { message, isActive });
+      setAnnouncements(announcements.map(a => a.id === editing.id ? { ...a, message, isActive } : a));
+      resetForm();
+    } catch (error) {
+      console.error("Error updating announcement:", error);
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteAnnouncement(id);
-      setAnnouncements(announcements.filter((announcement) => announcement.id !== id));
+      setAnnouncements(announcements.filter(a => a.id !== id));
     } catch (error) {
       console.error("Error deleting announcement:", error);
     }
@@ -144,11 +122,7 @@ const AnnouncementPage = () => {
         />
         <div className="flex items-center mb-4">
           <label className="mr-2">Active</label>
-          <input
-            type="checkbox"
-            checked={isActive}
-            onChange={() => setIsActive((prev) => !prev)}
-          />
+          <input type="checkbox" checked={isActive} onChange={() => setIsActive((prev) => !prev)} />
         </div>
         <Button onClick={editing ? handleUpdate : handleCreate}>
           {editing ? 'Update Announcement' : 'Create Announcement'}
@@ -179,10 +153,7 @@ const AnnouncementPage = () => {
                   <Button onClick={() => handleEdit(announcement)} className="mr-2 mb-2">
                     <PenIcon/>
                   </Button>
-                  <Button
-                    onClick={() => handleDelete(announcement.id)}
-                    variant="destructive"
-                  >
+                  <Button onClick={() => handleDelete(announcement.id)} variant="destructive">
                     <Trash2/>
                   </Button>
                 </TableCell>

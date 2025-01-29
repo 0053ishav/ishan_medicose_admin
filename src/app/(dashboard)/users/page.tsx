@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { fetchUsers } from '@/lib/appwrite'; // Adjust the import path
+import { fetchUsers } from '@/lib/appwrite';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
@@ -22,31 +22,19 @@ interface User {
 }
 
 const UsersPage = () => {
- 
-    const { loggedUser, userLoading } = useAuth();
-    const router = useRouter();
-    
-    useEffect(() => {
-      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
-        router.push("/sign-in");
-      }
-    }, [loggedUser, userLoading, router]);
-  
-    if (userLoading) {
-      return (
-        <div className="flex justify-center items-center w-full h-screen">
-            <Loader2 className="animate-spin text-foreground"/>
-        </div>
-      ) 
-    }
-      
-    if (!loggedUser || loggedUser.role !== "admin") return null;
-  
+  const { loggedUser, userLoading } = useAuth();
+  const router = useRouter();
 
-    const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-  
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== 'admin')) {
+      router.push('/sign-in');
+    }
+  }, [loggedUser, userLoading, router]);
+
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {
@@ -85,6 +73,7 @@ const UsersPage = () => {
     );
   }
 
+  // Show error if there was an issue fetching users
   if (error) {
     return (
       <div className="text-center text-red-500">
@@ -93,6 +82,7 @@ const UsersPage = () => {
     );
   }
 
+  // Render the users data
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Users Management</h1>
