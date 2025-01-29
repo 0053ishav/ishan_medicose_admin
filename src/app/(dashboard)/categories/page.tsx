@@ -17,15 +17,6 @@ interface Category {
 }
 
 const CategoriesPage = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryImageUrl, setCategoryImageUrl] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [editedCategoryName, setEditedCategoryName] = useState('');
-  const [editedCategoryImageUrl, setEditedCategoryImageUrl] = useState('');
-
 
     const { loggedUser, userLoading } = useAuth();
     const router = useRouter();
@@ -45,6 +36,16 @@ const CategoriesPage = () => {
     }
       
     if (!loggedUser || loggedUser.role !== "admin") return null;
+  
+
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoryName, setCategoryName] = useState('');
+    const [categoryImageUrl, setCategoryImageUrl] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+    const [editedCategoryName, setEditedCategoryName] = useState('');
+    const [editedCategoryImageUrl, setEditedCategoryImageUrl] = useState('');
   
 
   useEffect(() => {

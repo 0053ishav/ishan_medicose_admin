@@ -22,10 +22,7 @@ interface User {
 }
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+ 
     const { loggedUser, userLoading } = useAuth();
     const router = useRouter();
     
@@ -46,6 +43,10 @@ const UsersPage = () => {
     if (!loggedUser || loggedUser.role !== "admin") return null;
   
 
+    const [users, setUsers] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+  
   useEffect(() => {
     const fetchAllUsers = async () => {
       try {

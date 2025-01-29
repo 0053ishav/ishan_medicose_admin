@@ -16,31 +16,34 @@ interface Banner {
 }
 
 const BannersPage = () => {
+  const { loggedUser, userLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+      router.push("/sign-in");
+    }
+  }, [loggedUser, userLoading, router]);
+
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+          <Loader2 className="animate-spin text-foreground"/>
+      </div>
+    ) 
+  }
+    
+  if (!loggedUser || loggedUser.role !== "admin") return null;
+
+
+  
   const [banners, setBanners] = useState<Banner[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
 
-    const { loggedUser, userLoading } = useAuth();
-    const router = useRouter();
     
-    useEffect(() => {
-      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
-        router.push("/sign-in");
-      }
-    }, [loggedUser, userLoading, router]);
-  
-    if (userLoading) {
-      return (
-        <div className="flex justify-center items-center w-full h-screen">
-            <Loader2 className="animate-spin text-foreground"/>
-        </div>
-      ) 
-    }
-      
-    if (!loggedUser || loggedUser.role !== "admin") return null;
-  
 
   useEffect(() => {
     const loadBanners = async () => {

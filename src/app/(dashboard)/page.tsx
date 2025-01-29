@@ -8,30 +8,32 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
+  const { loggedUser, userLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
+      router.push("/sign-in");
+    }
+  }, [loggedUser, userLoading, router]);
+
+  // Ensure that no other hooks are called before authentication check completes
+  if (userLoading) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+        <Loader2 className="animate-spin text-foreground" />
+      </div>
+    );
+  }
+
+  if (!loggedUser || loggedUser.role !== "admin") return null;
+
+  // State hooks should be declared after the authentication check
   const [counts, setCounts] = useState({ total: 0, inStock: 0 });
   const [users, setUsers] = useState(0);
   const [subs, setSubs] = useState(0);
   const [loading, setLoading] = useState(false);
 
-    const { loggedUser, userLoading } = useAuth();
-    const router = useRouter();
-    
-    useEffect(() => {
-      if (!userLoading && (!loggedUser || loggedUser.role !== "admin")) {
-        router.push("/sign-in");
-      }
-    }, [loggedUser, userLoading, router]);
-  
-    if (userLoading) {
-      return (
-        <div className="flex justify-center items-center w-full h-screen">
-            <Loader2 className="animate-spin text-foreground"/>
-        </div>
-      ) 
-    }
-      
-    if (!loggedUser || loggedUser.role !== "admin") return null;
-  
   useEffect(() => {
     const getCountProducts = async () => {
       setLoading(true);
@@ -39,7 +41,7 @@ export default function DashboardPage() {
         const response = await fetchProductsCount();
         const result = await fetchUsersCount();
         const news = await fetchSubsCount();
-        setUsers(result)
+        setUsers(result);
         setCounts(response);
         setSubs(news);
       } catch (error) {
@@ -98,33 +100,31 @@ export default function DashboardPage() {
           </div>
         </div>
 
-{/* Total Users Card */}
-<div className="p-6 rounded-lg shadow-lg flex items-center justify-between bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:scale-105 transition-transform">
-  <div>
-    <h3 className="text-xl font-semibold text-white">Total Users</h3>
-    <p className="text-3xl font-bold text-white">
-      {loading ? <Loader2 className="animate-spin text-white" /> : users}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-full shadow-md">
-    <span className="text-2xl text-indigo-500"><User /></span>
-  </div>
-</div>
+        {/* Total Users Card */}
+        <div className="p-6 rounded-lg shadow-lg flex items-center justify-between bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:scale-105 transition-transform">
+          <div>
+            <h3 className="text-xl font-semibold text-white">Total Users</h3>
+            <p className="text-3xl font-bold text-white">
+              {loading ? <Loader2 className="animate-spin text-white" /> : users}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-full shadow-md">
+            <span className="text-2xl text-indigo-500"><User /></span>
+          </div>
+        </div>
 
-{/* Total Subs Card */}
-<div className="p-6 rounded-lg shadow-lg flex items-center justify-between bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600 hover:scale-105 transition-transform">
-  <div>
-    <h3 className="text-xl font-semibold text-white">Total Newsletter Subscribers</h3>
-    <p className="text-3xl font-bold text-white">
-      {loading ? <Loader2 className="animate-spin text-white" /> : subs}
-    </p>
-  </div>
-  <div className="bg-white p-4 rounded-full shadow-md">
-    <span className="text-2xl text-teal-500"><User /></span>
-  </div>
-</div>
-
-
+        {/* Total Subs Card */}
+        <div className="p-6 rounded-lg shadow-lg flex items-center justify-between bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600 hover:scale-105 transition-transform">
+          <div>
+            <h3 className="text-xl font-semibold text-white">Total Newsletter Subscribers</h3>
+            <p className="text-3xl font-bold text-white">
+              {loading ? <Loader2 className="animate-spin text-white" /> : subs}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-full shadow-md">
+            <span className="text-2xl text-teal-500"><User /></span>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">

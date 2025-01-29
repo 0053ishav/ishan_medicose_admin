@@ -17,12 +17,6 @@ interface Announcement {
 }
 
 const AnnouncementPage = () => {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [message, setMessage] = useState('');
-  const [isActive, setIsActive] = useState(false);
-  const [editing, setEditing] = useState<Announcement | null>(null);
-  const [loading, setLoading] = useState(false);
-
 
   const { loggedUser, userLoading } = useAuth();
   const router = useRouter();
@@ -42,6 +36,13 @@ const AnnouncementPage = () => {
   }
     
   if (!loggedUser || loggedUser.role !== "admin") return null;
+
+
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [message, setMessage] = useState('');
+  const [isActive, setIsActive] = useState(false);
+  const [editing, setEditing] = useState<Announcement | null>(null);
+  const [loading, setLoading] = useState(false);
 
 
   useEffect(() => {
